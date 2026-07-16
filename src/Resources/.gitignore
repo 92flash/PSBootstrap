@@ -1,0 +1,14 @@
+# Ignore the modules in the Module folder because they are developed according to their own development cycle
+Module/*
+!Module/.gitkeep
+
+# Ignore all JSON files in Config, except schema files.
+Config/**/*.json
+Config/**/*.back
+!Config/**/*_schema*.json
+
+# Ignore a local (development) version of the Bootstrap.xml file, which the developer can use to test changes without affecting the main Bootstrap.xml file.
+Bootstrap_local.xml
+
+# Ignore the Bootstrap module itself, which is a local resource that can easily be updated without having to ship another version of the script
+PSBootstrap.dll

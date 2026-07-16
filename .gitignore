@@ -1,0 +1,12 @@
+src/bin
+src/obj
+
+test/bin
+test/obj
+test/TestResults
+
+Design
+
+.vs/
+*.user
+.DS_Store

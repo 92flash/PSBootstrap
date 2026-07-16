@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bootstrap>
+    <!--
+        These are the properties that can be configured to control or change the behavior of the main script.
+        If you copy over and rename this XML to Bootstrap_local.xml, it will instead use the values from that file, which is useful for local testing and development.
+        When a Bootstrap_local.xml file is present, it won't be committed to the Git repository (when XML file and the script structure are created by New-BootstrapStructure), so you can safely change the values in that file without worrying about accidentally committing them to the repository.
+    -->
+
+    <!-- If set, the Bootstrap will check if the expected version matches the actual Bootstrap version  -->
+    <BootstrapVersion Value=""/>
+
+    <!-- JSON configuration file for the main script where all the actual logic is defined -->
+    <!-- Schema path is automatically constructed from the config filename with "_schema" appended (e.g. properties.json -> properties_schema.json). Make sure a schema file with that name actually exists, or loading will fail. This can be overridden by setting SchemaPath explicitly. -->
+    <!-- Set Enabled to false to skip loading a config entirely. When Enabled is true, FileName must be set or the script will throw an error. -->
+    <Config>
+        <Enabled Value="true"/>
+        <FileName Value="{{ConfigName}}"/>
+        <RootPath Value=".\Config"/>
+        <SchemaPath Value=""/>
+    </Config>
+
+    <!-- The path and any required functions, which it will check and load in, are defined here -->
+    <!-- If there are no required functions defined, it will just load in all the functions recursively from the RootPath -->
+    <Function>
+        <RootPath Value=".\Function"/>
+        <Required>
+            <Item Value=""/>
+        </Required>
+    </Function>
+
+    <!-- The path and any required modules, which it will check, are defined here -->
+    <!-- Modules are loaded in, but only functions within the module can be used from them, no typed definitions like [MyClass]::new() as these should still be loaded with using module .\Module\MyClass at the beginning of the script -->
+    <!-- Unlike Function, there is no fallback to load every module in RootPath. Only modules explicitly listed under Required will be checked and imported. -->
+    <Module>
+        <RootPath Value=".\Module"/>
+        <Required>
+            <Item Value="" Version=""/>
+        </Required>
+    </Module>
+
+    <!-- The path to the log file for the main script (logging (Write-Log) won't work if not specified) -->
+    <!-- Set Enabled to false to skip logging entirely. When Enabled is true but Path is empty, a warning is shown instead of failing. -->
+    <Log>
+        <Enabled Value="true"/>
+        <Path Value=""/>
+        <ShowShellOutput Value="false"/>
+    </Log>
+
+    <!-- Enable or disable verbose logging for the main script -->
+    <Verbose>
+        <Enabled Value="false"/>
+    </Verbose>
+
+    <!-- Enable or disable debug logging for the main script -->
+    <Debug>
+        <Enabled Value="false"/>
+    </Debug>
+</Bootstrap>
