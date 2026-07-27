@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 using PSBootstrap.Service;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Exception;
@@ -42,12 +43,16 @@ public class ScriptConfigTest
             correctLogPath = "C:\\Logs\\log.txt"; // File extension provided
         }
 
-        // Test if an exception is thrown when the log path does not have a file extension
-        File.WriteAllText(_xmlFilePath, File.ReadAllText(_xmlFilePath).Replace("<Path Value=\"\"/>", $"<Path Value=\"{wrongLogPath}\"/>"));
+        // Enable Log and set the wrong log path, then test if an exception is thrown when the log path does not have a file extension
+        XDocument xml = XDocument.Load(_xmlFilePath);
+        xml.Root!.Element("Log")!.Element("Enabled")!.Attribute("Value")!.Value = "true";
+        xml.Root!.Element("Log")!.Element("Path")!.Attribute("Value")!.Value = wrongLogPath;
+        xml.Save(_xmlFilePath);
         Assert.ThrowsException<BootstrapException>(() => _scriptConfigService?.Convert(), "Log.Path should throw an exception when no file extension is provided.");
 
         // Set the correct log path and test if the ScriptConfig object is created successfully
-        File.WriteAllText(_xmlFilePath, File.ReadAllText(_xmlFilePath).Replace($"<Path Value=\"{wrongLogPath}\"/>", $"<Path Value=\"{correctLogPath}\"/>"));
+        xml.Root!.Element("Log")!.Element("Path")!.Attribute("Value")!.Value = correctLogPath;
+        xml.Save(_xmlFilePath);
         ScriptConfig? scriptConfig = _scriptConfigService?.Convert();
         Assert.IsNotNull(scriptConfig, "ScriptConfig should not be null.");
 

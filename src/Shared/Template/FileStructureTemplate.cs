@@ -11,7 +11,7 @@ namespace PSBootstrap.Shared.Template;
 
 internal static class FileStructureTemplate
 {
-    public static FileSystemEntry[] Get(string configName, string scriptName, string scriptConfigName) =>
+    public static FileSystemEntry[] Get(string configName, string scriptName, string scriptConfigName, string moduleVersion = "", string logPath = "") =>
     [
         new TemplateFolder("Config", [
             new TemplateFile($"{configName}.json", "{\n\n}"),
@@ -24,7 +24,10 @@ internal static class FileStructureTemplate
         new TemplateFolder("Module"),
         new TemplateFolder("Test"),
         new TemplateFile(".gitignore", ReadEmbeddedResource(".gitignore")),
-        new TemplateFile($"{scriptConfigName}.xml", ReadEmbeddedResource("Bootstrap.xml").Replace("{{ConfigName}}", configName)),
+        new TemplateFile($"{scriptConfigName}.xml", ReadEmbeddedResource("Bootstrap.xml")
+            .Replace("{{ConfigName}}", configName)
+            .Replace("{{ModuleVersion}}", moduleVersion)
+            .Replace("{{LogPath}}", logPath)),
         new TemplateFile($"{scriptName}.ps1", ReadEmbeddedResource("Main.ps1")),
     ];
 

@@ -26,4 +26,5 @@ internal static class BootstrapContext
         }
     }
     internal static bool ShowShellOutput { get; set; }
+    internal static bool RanBootstrap { get; set; } = false;
 }

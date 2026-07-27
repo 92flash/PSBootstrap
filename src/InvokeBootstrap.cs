@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -22,7 +23,7 @@ namespace PSBootstrap
         private ScriptConfig _scriptConfig;
         private IBootstrapService _bootstrapService;
         private IConfigService _configService;
-        private object _config;
+        private Collection<PSObject> _config;
 
         // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
         protected override void BeginProcessing()
@@ -37,7 +38,7 @@ namespace PSBootstrap
                 {
                     string file = Path.GetFileName(xmlPath);
                     string directory = Path.GetDirectoryName(xmlPath);
-                    throw new BootstrapException($"The Boostrap XML '{file}' doesn't exist at location '{directory}'. You can create a new Bootstrap.xml file by running the 'New-BootstrapStructure' cmdlet.");
+                    throw new BootstrapException($"The Bootstrap XML '{file}' doesn't exist at location '{directory}'. You can create a new Bootstrap.xml file by running the 'New-BootstrapStructure' cmdlet.");
                 }  
 
                 // Load the script configuration from the XML file
@@ -53,7 +54,7 @@ namespace PSBootstrap
                     Assembly assembly = Assembly.GetExecutingAssembly();
                     string informationalVersion = assembly
                         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                        ?.InformationalVersion ?? string.Empty;
+                        ?.InformationalVersion.Split('+')[0] ?? string.Empty;
 
                     if (informationalVersion != _scriptConfig.BootstrapVersion.ToString())
                     {
@@ -117,6 +118,11 @@ namespace PSBootstrap
 
                     JsonSchemaPath schemaPath = _scriptConfig.SchemaPath ?? new(Path.Combine(_scriptConfig.ConfigPath.ToString(), $"{_scriptConfig.ConfigFileName}_schema.json"));
                     _config = _configService.Convert(schemaPath);
+
+                    if (_config == null ||  _config.Count == 0  || _config[0].Properties.Count() == 0)
+                    {
+                        throw new BootstrapException($"The configuration was successfully loaded but returned null. Please make sure {_scriptConfig.ConfigPath}\\{_scriptConfig.ConfigFileName}.json contains valid JSON properties or turn off the 'Config' feature in the 'Bootstrap.xml' file.");
+                    }
                 }
             }
             catch (Exception ex)
@@ -135,6 +141,8 @@ namespace PSBootstrap
         // This method will be called once at the end of pipeline execution; if no input is received, this method is not called
         protected override void EndProcessing()
         {
+            BootstrapContext.RanBootstrap = true;
+
             // Return the (domain) configuration object to the pipeline if it was loaded and validated successfully
             WriteObject(_config);
         }

@@ -56,8 +56,7 @@ namespace PSBootstrap
         {
             if (LogPath == null)
             {
-                var ex = new BootstrapException("LogPath is not set. Please set the LogPath as a parameter or as an environment variable ($env:LogPath)");
-                ThrowTerminatingError(new ErrorRecord(ex, "LogPathNotSet", ErrorCategory.InvalidArgument, null));
+                ThrowAsScriptError(new BootstrapException("LogPath is not set. Make sure LogPath is either set via the '-LogPath' parameter or by enabling the Log in 'Bootstrap.xml' and running 'Invoke-Bootstrap'."));
                 return;
             }
 
@@ -97,6 +96,15 @@ namespace PSBootstrap
             // Write the message to the PowerShell host
             ShellUtil shellUtil = new(this);
             if (ShowShellOutput == true) shellUtil.WriteType(Message, Type);
+        }
+
+        // Re-throws this exception as a genuine PowerShell script-level "throw", which unconditionally stops the calling
+        // script (matching PowerShell's own throw behavior) regardless of $ErrorActionPreference or begin/process/end block
+        // boundaries - unlike ThrowTerminatingError, which doesn't reliably propagate as terminating across those boundaries.
+        // Still fully catchable by an explicit try/catch in the caller, unlike Environment.Exit().
+        private void ThrowAsScriptError(Exception ex)
+        {
+            InvokeCommand.InvokeScript("param($e) throw $e", [ex]);
         }
     }
 }

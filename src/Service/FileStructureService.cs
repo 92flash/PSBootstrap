@@ -21,7 +21,16 @@ internal class FileStructureService : IFileStructureService
                     }
                     break;
                 case TemplateFile file:
-                    File.WriteAllText(Path.Combine(baseDirectory, file.Name), file.Content ?? string.Empty);
+                    if (!Directory.Exists(baseDirectory))
+                    {
+                        Directory.CreateDirectory(baseDirectory);
+                    }
+
+                    if (!File.Exists(Path.Combine(baseDirectory, file.Name)))
+                    {
+                        File.WriteAllText(Path.Combine(baseDirectory, file.Name), file.Content ?? string.Empty);
+                    }
+                    
                     break;
             }
         }

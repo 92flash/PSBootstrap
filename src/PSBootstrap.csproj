@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>PSBootstrap</AssemblyName>
     <langVersion>12.0</langVersion>
-    <InformationalVersion>0.1.0</InformationalVersion>
+    <InformationalVersion>0.1.1</InformationalVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 

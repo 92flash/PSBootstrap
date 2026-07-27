@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Bootstrap>
     <!--
-        These are the properties that can be configured to control or change the behavior of the main script.
+        These are the properties that can be configured to control or change the behavior of the PSBootstrap module.
         If you copy over and rename this XML to Bootstrap_local.xml, it will instead use the values from that file, which is useful for local testing and development.
-        When a Bootstrap_local.xml file is present, it won't be committed to the Git repository (when XML file and the script structure are created by New-BootstrapStructure), so you can safely change the values in that file without worrying about accidentally committing them to the repository.
+        When a Bootstrap_local.xml file is present, it won't be committed to the Git repository (.gitignore), so you can safely change the values in that file without worrying about accidentally committing them to the repository.
     -->
 
     <!-- If set, the Bootstrap will check if the expected version matches the actual Bootstrap version  -->
-    <BootstrapVersion Value=""/>
+    <BootstrapVersion Value="{{ModuleVersion}}"/>
 
     <!-- JSON configuration file for the main script where all the actual logic is defined -->
     <!-- Schema path is automatically constructed from the config filename with "_schema" appended (e.g. properties.json -> properties_schema.json). Make sure a schema file with that name actually exists, or loading will fail. This can be overridden by setting SchemaPath explicitly. -->
-    <!-- Set Enabled to false to skip loading a config entirely. When Enabled is true, FileName must be set or the script will throw an error. -->
+    <!-- Set Enabled to true to return a loaded JSON config from the set RootPath and FileName. When Enabled is true, the config file must have properties or it will throw a terminating error. -->
     <Config>
-        <Enabled Value="true"/>
+        <Enabled Value="false"/>
         <FileName Value="{{ConfigName}}"/>
         <RootPath Value=".\Config"/>
         <SchemaPath Value=""/>
@@ -39,10 +39,10 @@
     </Module>
 
     <!-- The path to the log file for the main script (logging (Write-Log) won't work if not specified) -->
-    <!-- Set Enabled to false to skip logging entirely. When Enabled is true but Path is empty, a warning is shown instead of failing. -->
+    <!-- Set Enabled to true to enable logging. When Enabled is true but Path is empty, module will throw a terminating error. -->
     <Log>
-        <Enabled Value="true"/>
-        <Path Value=""/>
+        <Enabled Value="false"/>
+        <Path Value="{{LogPath}}"/>
         <ShowShellOutput Value="false"/>
     </Log>
 

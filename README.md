@@ -6,22 +6,32 @@ This module has been written to provide a stable base for every PowerShell scrip
 
 The project philosophy is "A script needs to have a reliable way to be initialized and stupidly simple to make that possible".
 
+## Who is PSBootstrap for
+
+PSBootstrap is designed for PowerShell developers that want a more rigid base for their scripts and who don't want to reprogram the same startup checks and imports at the start of the script every time. It is meant for medium sized projects. A script with a few lines won't benefit much from what PSBootstrap has to offer. And with large projects you could argue against using PowerShell entirely and develop in a more robust programming language like C#.
+
 ## Onboarding
 
-To start using PSBootstrap, you can download the module via the Releases tab in Github or via a command in PowerShell:
-``` PowerShell
-iwr (iwr https://api.github.com/repos/92flash/PSBootstrap/releases/latest | ConvertFrom-Json).assets.browser_download_url -OutFile PSBootstrap.dll
-```
-
-To be able to use the module, you need to import the module first.
+When first starting with PSBootstrap, the module needs to be downloaded, imported and a new Bootstrap structure needs to be created. The function New-PSProject below will take care of that. The function can be copied and run for your first project.
 
 ``` PowerShell
-Import-Module .\PSBootstrap.dll
+function New-PSProject {
+    iwr (iwr https://api.github.com/repos/92flash/PSBootstrap/releases/latest | ConvertFrom-Json).assets.browser_download_url -OutFile PSBootstrap.dll
+    Import-Module .\PSBootstrap.dll
+    New-BootstrapStructure
+}
 ```
 
-To create a new project structure, you can run the `New-BootstrapStructure` cmdlet. This makes sure a proper file structure with the main script exists so that you only have to worry about the script functionality itself
+The function can also be added to your PowerShell profile so you're able to easily create multiple new projects without having to copy and paste the function every time.
 
-Before running your script, open Bootstrap.xml and configure it for your project. Most sections are enabled by default and expect values. The logging is enabled by default, but needs a variable or else it will throw a terminating exception at the start of the script.
+## First steps after Onboarding
+
+What you might want to do after onboarding is go into the `Bootstrap.xml` module config and change the following properties:
+* Turn on Log.Enabled by changing the value from false to true to enable logging
+* Change Log.Path as by default a Log directory is created at the project path at the first time when something is logged
+* Turn on Config.Enabled by changing the value from false to true to return the Json domain config back to the `Invoke-Bootstrap` cmdlet (make sure you have entered one or more properties in the config and matched the schema with it)
+
+These settings will ensure the `Write-Log` cmdlet will work as expected and config properties inside of the main script can be used (e.g. `$Config.Email`).
 
 ## Available Cmdlets
 
@@ -35,7 +45,7 @@ Before running your script, open Bootstrap.xml and configure it for your project
 
 ## Xml Config
 
-The `Bootstrap.xml` file holds all the properties for the script to properly load the environment. Adding functions to the Function section or modules to the Module section allows these required dependencies to be checked and automatically loaded. It also makes sure to add logging, enable/disable verbose or debugging and returns a configuration file for the script to use.
+The `Bootstrap.xml` file holds all the properties for the module to properly load the environment. Adding functions to the Function section or modules to the Module section allows these required dependencies to be checked and automatically loaded (note that loading all functions is the default, but by specifying one or more functions, only those are loaded, potentially leaving other functions unloaded and unusable in the main script). It also makes sure to add logging, enable/disable verbose or debugging and returns a configuration file for the module to use.
 
 Worth noting is that if the Xml gets duplicated and renamed to `Bootstrap_local.xml`, the config will be used over the normal config file and won't be included in the Git repository. This is especially useful when the script needs to be tested with different values over the production script.
 
@@ -84,11 +94,23 @@ The following files and folders are ignored by default, but can be added if requ
 - Everything in the Module folder as the modules have their own development cycle, but adding a version number to the module manifest file and the `Bootstrap.xml` Module.Required section, makes sure that the new module is tested with the main script
 - The `PSBootstrap.dll` is excluded because the module needs to be easily upgradable
 
-## Development decisions
+## Decisions
 
-### ILRepack
+This project has made decisions beforehand, but allows for as much configurability without sacrificing the rigidity that it's meant to add to projects.
 
-In this project I chose to use ILRepack to include the necessary dependencies all in one file. I found this important because PSBootstrap.dll needs to be understood easily and also movable between projects and folders. Also adding different dependencies added too much complexity, so the only way to make sure that the onboarding is as smooth as possible is to include the dependencies in the module itself.
+### Config
+
+Two different config technologies are used on purpose in this project. XML is chosen for the module config because XML works really well natively in C#/PowerShell and are able to add comments, documenting what each property does and expects. The module also always expects the same layout, so it's really easy to program for this without a schema binding contract.
+
+The Json config on the other hand has been specifically chosen for the domain properties because it has the ability for a really strong contract binding with a schema file. The schema file is only committed to the Git-repository and not the properties themselves because these properties often need to be able to change without changing the project and re-committing these changes. And the config also could contain sensitive details that you don't want committed. To make sure the script can use the properties it expects, the schema helps enforce this by checking if the same structure in the config is present as specified in the schema file.
+
+### One module design
+
+In this project is chosen to use ILRepack to include the necessary dependencies all in one file. This is important because PSBootstrap.dll needs to be understood easily and also be movable between projects and folders. Also downloading/copying different dependencies to the project root adds too much complexity and clutter. The only way to make sure that the onboarding is as smooth as possible is to include the dependencies in the module itself.
+
+### Fail fast design
+
+This module is modeled a bit after the rigid design of compilers of real programming languages. Because compilers also let the user know what is gone wrong at the beginning of the project (or actually at build time), the `Invoke-Bootstrap` will fail and immediately stop the script if one of the checks aren't met. The goal with this project was to be able to have around 80% as much stability in PowerShell as you would have in a real programming language. Why not use a real programming language by this point then? Because PowerShell still adds real value and advantages. It's easy to understand, can be changed really easily and also cuts down development time.
 
 ## Project file structure
 
@@ -97,7 +119,7 @@ PSBootstrap
 ├─ src                              
 │ ├─ Resources                      Resources the module needs to set the files for New-BootstrapStructure
 │ │ ├─ .gitignore                   Here do the exclusions for Git live
-│ │ ├─ Bootstrap.xml                The Script Config to control the actions of the script
+│ │ ├─ Bootstrap.xml                The module Config to control the actions of the script
 │ │ ├─ Main.ps1                     PowerShell script-template where the new script will be based on
 │ │ └─ properties_schema.json       An empty Json Schema file
 │ ├─ Service                        Actual implementation
@@ -105,7 +127,7 @@ PSBootstrap
 │ │ ├─ ConfigService.cs             Actions for the domain Json config
 │ │ ├─ FileStructureService.cs      Create a new file structure for New-BootstrapStructure
 │ │ ├─ LogService.cs                Logging implementation
-│ │ └─ ScriptConfigService.cs       Convert script config to a usable object
+│ │ └─ ScriptConfigService.cs       Convert module config to a usable object
 │ ├─ Shared
 │ │ ├─ Context
 │ │ │ └─ BootstrapContext.cs        Global context so different modules can use this context
@@ -152,6 +174,6 @@ PSBootstrap
 ├─ test
 │ ├─ ConfigTest.cs                  Test the Json domain config implementation
 │ ├─ LogTest.cs                     Test the logging implementation
-│ └─ ScriptConigTest.cs             Test the XML script config implementation
+│ └─ ScriptConigTest.cs             Test the XML module config implementation
 └─ README.md                        User documentation
 ```

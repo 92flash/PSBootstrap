@@ -14,11 +14,11 @@ namespace PSBootstrap.Service;
 
 public class ConfigService(JsonConfigPath jsonConfigPath) : IConfigService
 {
-    public object? Config { get; private set; }
+    public Collection<PSObject>? Config { get; private set; }
     private readonly JsonConfigPath _jsonConfigPath = jsonConfigPath;
 
     // Convert the JSON configuration file to a PowerShell object and optionally validate it against a JSON schema
-    public object? Convert(JsonSchemaPath? schemaPath = null)
+    public Collection<PSObject>? Convert(JsonSchemaPath? schemaPath = null)
     {
         // Read the JSON content from the configuration file and validate it against the provided schema if specified
         string jsonContent = File.ReadAllText(_jsonConfigPath.ToString());
