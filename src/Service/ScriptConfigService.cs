@@ -62,8 +62,10 @@ internal class ScriptConfigService(string xmlPath) : IScriptConfigService
         string? configFileName = null;
         ConfigPath? configPath = null;
         JsonSchemaPath? schemaPath = null;
+        bool autoResolveRelativeConfigPaths = false;
         if (GetValue(config, "Enabled") == "true")
         {
+            autoResolveRelativeConfigPaths = GetValue(config, "AutoResolveRelativePaths") == "true";
             configFileName = GetValue(config, "FileName");
             string configPathValue = GetValue(config, "RootPath");
             configPath = new(!string.IsNullOrWhiteSpace(configPathValue) ? ResolvePath(baseDirectory, configPathValue) : string.Empty);
@@ -72,27 +74,39 @@ internal class ScriptConfigService(string xmlPath) : IScriptConfigService
         }
 
         // Get the function root path and the list of required functions
-        FunctionPath functionPath = new(ResolvePath(baseDirectory, GetValue(function, "RootPath")));
-        string[] functions = function.Elements("Required")
-            .Elements("Item")
-            .Select(item => item.Attribute("Value")?.Value ?? string.Empty)
-            .Where(v => !string.IsNullOrWhiteSpace(v))
-            .ToArray() ?? [];
+        bool functionsEnabled = GetValue(function, "Enabled") == "true";
+        FunctionPath? functionPath = null;
+        string[] functions = Array.Empty<string>();
+        if (functionsEnabled)
+        {
+            functionPath = new(ResolvePath(baseDirectory, GetValue(function, "RootPath")));
+            functions = function.Elements("Required")
+                .Elements("Item")
+                .Select(item => item.Attribute("Value")?.Value ?? string.Empty)
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .ToArray() ?? [];
+        }
 
         // Get the module root path and the list of required modules with their optional versions
-        ModulePath modulePath = new(ResolvePath(baseDirectory, GetValue(module, "RootPath")));
-        List<RequiredModule> modules = module.Element("Required")?
-            .Elements("Item")
-            .Where(item => !string.IsNullOrWhiteSpace(item.Attribute("Value")?.Value))
-            .Select(item =>
-            {
-                string name = item.Attribute("Value")!.Value;
-                string? versionString = item.Attribute("Version")?.Value;
-                Version? version = !string.IsNullOrWhiteSpace(versionString) && Version.TryParse(versionString, out var parsed)
-                    ? parsed : null;
-                return new RequiredModule(name, version);
-            })
-            .ToList() ?? [];
+        bool modulesEnabled = GetValue(module, "Enabled") == "true";
+        ModulePath? modulePath = null;
+        List<RequiredModule> modules = [];
+        if (modulesEnabled)
+        {
+            modulePath = new(ResolvePath(baseDirectory, GetValue(module, "RootPath")));
+            modules = module.Element("Required")?
+                .Elements("Item")
+                .Where(item => !string.IsNullOrWhiteSpace(item.Attribute("Value")?.Value))
+                .Select(item =>
+                {
+                    string name = item.Attribute("Value")!.Value;
+                    string? versionString = item.Attribute("Version")?.Value;
+                    Version? version = !string.IsNullOrWhiteSpace(versionString) && Version.TryParse(versionString, out var parsed)
+                        ? parsed : null;
+                    return new RequiredModule(name, version);
+                })
+                .ToList() ?? [];
+        }
 
         // Get the logging settings, including whether logging is enabled, the log file path, and whether to show shell output
         bool logEnabled = GetValue(log, "Enabled") == "true";
@@ -112,8 +126,8 @@ internal class ScriptConfigService(string xmlPath) : IScriptConfigService
         bool debug = bool.Parse(GetValue(root.Element("Debug"), "Enabled"));
 
         return new ScriptConfig(
-            bootstrapVersion, configFileName, configPath, schemaPath, functionPath, functions,
-            modulePath, modules, logEnabled, logPath, showShellOutput, verbose, debug
+            bootstrapVersion, autoResolveRelativeConfigPaths, configFileName, configPath, schemaPath, functionsEnabled, functionPath, functions,
+            modulesEnabled, modulePath, modules, logEnabled, logPath, showShellOutput, verbose, debug
         );
     }
 }

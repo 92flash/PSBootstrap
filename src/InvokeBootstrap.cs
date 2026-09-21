@@ -74,18 +74,24 @@ namespace PSBootstrap
             try
             {
                 // Load and check the functions specified in the script configuration
-                _bootstrapService.LoadFunctions(_scriptConfig.FunctionPath.ToString(), _scriptConfig.Functions);
-                if (_scriptConfig.Functions.Length > 0)
+                if (_scriptConfig.FunctionsEnabled)
                 {
-                    _bootstrapService.CheckFunctions(_scriptConfig.Functions);
+                    _bootstrapService.LoadFunctions(_scriptConfig.FunctionPath.ToString(), _scriptConfig.Functions);
+                    if (_scriptConfig.Functions.Length > 0)
+                    {
+                        _bootstrapService.CheckFunctions(_scriptConfig.Functions);
+                    }
                 }
 
                 // Load and check the modules specified in the script configuration
-                string[] moduleNames = [.. _scriptConfig.Modules.Select(m => m.Name)];
-                if (moduleNames.Length > 0)
+                if (_scriptConfig.ModulesEnabled)
                 {
-                    _bootstrapService.CheckModules(moduleNames);
-                    _bootstrapService.LoadModules(_scriptConfig.ModulePath.ToString(), moduleNames);
+                    string[] moduleNames = [.. _scriptConfig.Modules.Select(m => m.Name)];
+                    if (moduleNames.Length > 0)
+                    {
+                        _bootstrapService.CheckModules(moduleNames);
+                        _bootstrapService.LoadModules(_scriptConfig.ModulePath.ToString(), moduleNames);
+                    }
                 }
 
                 // If logging is enabled, set the LogPath for other cmdlets and throw an exception if the LogPath is not specified in the script configuration
@@ -114,10 +120,11 @@ namespace PSBootstrap
                     }
 
                     JsonConfigPath jsonConfigPath = new(Path.Combine(_scriptConfig.ConfigPath.ToString(), $"{_scriptConfig.ConfigFileName}.json"));
-                    _configService = new ConfigService(jsonConfigPath);
+                    _configService = new ConfigService();
 
                     JsonSchemaPath schemaPath = _scriptConfig.SchemaPath ?? new(Path.Combine(_scriptConfig.ConfigPath.ToString(), $"{_scriptConfig.ConfigFileName}_schema.json"));
-                    _config = _configService.Convert(schemaPath);
+                    string relativePathReplacement = _scriptConfig.AutoResolveRelativeConfigPaths ? MyInvocation.MyCommand.Module.ModuleBase : string.Empty;
+                    _config = _configService.ConvertFromPath(jsonConfigPath, schemaPath, relativePathReplacement);
 
                     if (_config == null ||  _config.Count == 0  || _config[0].Properties.Count() == 0)
                     {
@@ -131,7 +138,7 @@ namespace PSBootstrap
                 if (_scriptConfig.LogEnabled && _scriptConfig.LogPath != null)
                 {
                     using ILogService logService = new LogService(_scriptConfig.LogPath);
-                    logService.Append($"An error occurred during the bootstrap process: {ex.Message}", LogType.Error, true);
+                    logService.Append($"An error occurred during the bootstrap process: {ex.Message}", LogType.Fatal, true);
                 }
 
                 ThrowAsScriptError(ex);
@@ -153,7 +160,16 @@ namespace PSBootstrap
         // Still fully catchable by an explicit try/catch in the caller, unlike Environment.Exit().
         private void ThrowAsScriptError(Exception ex)
         {
-            InvokeCommand.InvokeScript("param($e) throw $e", [ex]);
+            // Do not pass the Exception object through the PowerShell parameter
+            // binder. It can be deserialized as an object whose rendered message
+            // is empty. Throw the complete text from PowerShell instead.
+            string message = ex.Message.ToString();
+            InvokeCommand.InvokeScript(
+                "param($m) throw $m",
+                useNewScope: false,
+                writeToPipeline: PipelineResultTypes.None,
+                input: null,
+                args: message);
         }
     }
 }

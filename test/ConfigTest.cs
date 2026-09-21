@@ -31,7 +31,7 @@ public class ConfigTest
         _jsonConfigPath = new(Path.Combine(_rootPath, "Config/properties.json"));
         _jsonSchemaPath = new(Path.Combine(_rootPath, "Config/properties_schema.json"));
 
-        _configService = new ConfigService(_jsonConfigPath);
+        _configService = new ConfigService();
     }
 
     [TestMethod]
@@ -47,12 +47,12 @@ public class ConfigTest
         Assert.IsNotNull(_configService, "Config service should not be null.");
         File.WriteAllText(_jsonSchemaPath?.ToString() ?? string.Empty, File.ReadAllText(_jsonSchemaPath?.ToString() ?? string.Empty).Replace(actualProperties, falseProperties));
         File.WriteAllText(_jsonSchemaPath?.ToString() ?? string.Empty, File.ReadAllText(_jsonSchemaPath?.ToString() ?? string.Empty).Replace(actualRequired, falseRequired));
-        Assert.ThrowsException<BootstrapException>(() => _configService?.Convert(_jsonSchemaPath), "Config service should throw an exception when the JSON content does not conform to the schema.");
+        Assert.ThrowsException<BootstrapException>(() => _configService?.ConvertFromPath(_jsonConfigPath!, _jsonSchemaPath), "Config service should throw an exception when the JSON content does not conform to the schema.");
 
         // Return the JSON schema to its original state and test if the Config object is created successfully
         File.WriteAllText(_jsonSchemaPath?.ToString() ?? string.Empty, File.ReadAllText(_jsonSchemaPath?.ToString() ?? string.Empty).Replace(falseProperties, actualProperties));
         File.WriteAllText(_jsonSchemaPath?.ToString() ?? string.Empty, File.ReadAllText(_jsonSchemaPath?.ToString() ?? string.Empty).Replace(falseRequired, actualRequired));
-        object? config = _configService?.Convert(_jsonSchemaPath);
+        object? config = _configService?.ConvertFromPath(_jsonConfigPath!, _jsonSchemaPath);
         Assert.IsNotNull(config, "Config should not be null.");
     }
 

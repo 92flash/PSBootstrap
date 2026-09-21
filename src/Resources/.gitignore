@@ -12,3 +12,5 @@ Bootstrap_local.xml
 
 # Ignore the Bootstrap module itself, which is a local resource that can easily be updated without having to ship another version of the script
 PSBootstrap.dll
+
+#### Add any of your own local development files or folders below this line, if needed.

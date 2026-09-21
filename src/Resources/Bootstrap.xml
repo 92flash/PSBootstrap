@@ -12,8 +12,10 @@
     <!-- JSON configuration file for the main script where all the actual logic is defined -->
     <!-- Schema path is automatically constructed from the config filename with "_schema" appended (e.g. properties.json -> properties_schema.json). Make sure a schema file with that name actually exists, or loading will fail. This can be overridden by setting SchemaPath explicitly. -->
     <!-- Set Enabled to true to return a loaded JSON config from the set RootPath and FileName. When Enabled is true, the config file must have properties or it will throw a terminating error. -->
+    <!-- AutoResolveRelativePaths determines whether relative paths in the configuration should be automatically resolved to absolute paths. -->
     <Config>
-        <Enabled Value="false"/>
+        <AutoResolveRelativePaths Value="{{ConfigAutoResolvePaths}}"/>
+        <Enabled Value="{{ConfigEnabled}}"/>
         <FileName Value="{{ConfigName}}"/>
         <RootPath Value=".\Config"/>
         <SchemaPath Value=""/>
@@ -22,6 +24,7 @@
     <!-- The path and any required functions, which it will check and load in, are defined here -->
     <!-- If there are no required functions defined, it will just load in all the functions recursively from the RootPath -->
     <Function>
+        <Enabled Value="true"/>
         <RootPath Value=".\Function"/>
         <Required>
             <Item Value=""/>
@@ -32,6 +35,7 @@
     <!-- Modules are loaded in, but only functions within the module can be used from them, no typed definitions like [MyClass]::new() as these should still be loaded with using module .\Module\MyClass at the beginning of the script -->
     <!-- Unlike Function, there is no fallback to load every module in RootPath. Only modules explicitly listed under Required will be checked and imported. -->
     <Module>
+        <Enabled Value="true"/>
         <RootPath Value=".\Module"/>
         <Required>
             <Item Value="" Version=""/>
@@ -41,9 +45,9 @@
     <!-- The path to the log file for the main script (logging (Write-Log) won't work if not specified) -->
     <!-- Set Enabled to true to enable logging. When Enabled is true but Path is empty, module will throw a terminating error. -->
     <Log>
-        <Enabled Value="false"/>
+        <Enabled Value="{{LogEnabled}}"/>
         <Path Value="{{LogPath}}"/>
-        <ShowShellOutput Value="false"/>
+        <ShowShellOutput Value="{{LogShowShellOutput}}"/>
     </Log>
 
     <!-- Enable or disable verbose logging for the main script -->

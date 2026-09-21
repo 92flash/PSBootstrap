@@ -8,6 +8,7 @@ namespace PSBootstrap.Shared.Interface;
 
 internal interface IConfigService
 {
-    public Collection<PSObject>? Convert(JsonSchemaPath? schemaPath = null);
+    public Collection<PSObject>? Convert(string inputObject, JsonSchemaPath? schemaPath = null, string? relativePathReplacement = null);
+    public Collection<PSObject>? ConvertFromPath(JsonConfigPath jsonConfigPath, JsonSchemaPath? schemaPath = null, string? relativePathReplacement = null);
     public object? SearchProperty(string propertyName);
 }

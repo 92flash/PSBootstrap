@@ -13,6 +13,26 @@ namespace PSBootstrap
     [Cmdlet(VerbsCommon.New,"BootstrapStructure")]
     public class NewBootstrapStructureCmdletCommand : PSCmdlet
     {
+        [Parameter(
+            HelpMessage = "Enable configuration directly in the Bootstrap config"
+        )]
+        public SwitchParameter EnableConfig { get; set; }
+
+        [Parameter(
+            HelpMessage = "Enable automatic resolution of paths, when the Config section is also enabled, in the Bootstrap config"
+        )]
+        public SwitchParameter EnableConfigAutoResolvePaths { get; set; }
+
+        [Parameter(
+            HelpMessage = "Enable logging directly in the Bootstrap config"
+        )]
+        public SwitchParameter EnableLogging { get; set; }
+
+        [Parameter(
+            HelpMessage = "Enable showing the same log message in the shell output if logging is also enabled"
+        )]
+        public SwitchParameter EnableShowShellOutput { get; set; }
+
         private string moduleVersion;
         private string currentDirectoryName;
         private IFileStructureService fileStructureService;
@@ -29,7 +49,9 @@ namespace PSBootstrap
         // This method will be called for each input received from the pipeline to this cmdlet; if no input is received, this method is not called
         protected override void ProcessRecord()
         {
-            fileStructureService.Create(SessionState.Path.CurrentLocation.ProviderPath, FileStructureTemplate.Get("properties", currentDirectoryName, "Bootstrap", moduleVersion, $".\\Log\\{currentDirectoryName}.log"));
+            fileStructureService.Create(SessionState.Path.CurrentLocation.ProviderPath, FileStructureTemplate.Get(
+                "properties", currentDirectoryName, "Bootstrap", moduleVersion, $".\\Log\\{currentDirectoryName}.log",
+                EnableConfig.IsPresent, EnableConfigAutoResolvePaths.IsPresent, EnableLogging.IsPresent, EnableShowShellOutput.IsPresent));
         }
 
         // This method will be called once at the end of pipeline execution; if no input is received, this method is not called
