@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Management.Automation;
 using PSBootstrap.Service;
 using PSBootstrap.Shared.Entity;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Value_object;
 
 namespace PSBootstrap
@@ -37,7 +36,7 @@ namespace PSBootstrap
         )]
         public bool AutoResolveRelativeConfigPaths { get; set; }
 
-        private IConfigService _configService;
+        private ConfigService _configService;
         private List<string> _inputLines;
         private string _relativePathReplacement;
 

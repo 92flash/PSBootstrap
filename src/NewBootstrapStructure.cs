@@ -4,7 +4,6 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
 using PSBootstrap.Service;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
@@ -35,7 +34,7 @@ namespace PSBootstrap
 
         private string moduleVersion;
         private string currentDirectoryName;
-        private IFileStructureService fileStructureService;
+        private FileStructureService fileStructureService;
 
         // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
         protected override void BeginProcessing()

@@ -2,7 +2,6 @@ using PSBootstrap.Service;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Enum;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
@@ -11,7 +10,7 @@ namespace Test;
 [TestClass]
 public class LogTest
 {
-    private ILogService? _logService;
+    private LogService? _logService;
     private string? _logFilePath;
     private readonly string _expectedLogEntry = "This is a test log entry.";
 

@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using PSBootstrap.Service;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
@@ -11,8 +10,8 @@ namespace Test;
 [TestClass]
 public class ConfigTest
 {
-    private IConfigService? _configService;
-    private IFileStructureService? _fileStructureService;
+    private ConfigService? _configService;
+    private FileStructureService? _fileStructureService;
     private string _rootPath = string.Empty;
     private JsonConfigPath? _jsonConfigPath;
     private JsonSchemaPath? _jsonSchemaPath;

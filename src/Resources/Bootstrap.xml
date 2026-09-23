@@ -12,7 +12,7 @@
     <!-- JSON configuration file for the main script where all the actual logic is defined -->
     <!-- Schema path is automatically constructed from the config filename with "_schema" appended (e.g. properties.json -> properties_schema.json). Make sure a schema file with that name actually exists, or loading will fail. This can be overridden by setting SchemaPath explicitly. -->
     <!-- Set Enabled to true to return a loaded JSON config from the set RootPath and FileName. When Enabled is true, the config file must have properties or it will throw a terminating error. -->
-    <!-- AutoResolveRelativePaths determines whether relative paths in the configuration should be automatically resolved to absolute paths. -->
+    <!-- AutoResolveRelativePaths automatically resolves a relative path with the project root path if the JSON key ends with "Path" or "Paths". -->
     <Config>
         <AutoResolveRelativePaths Value="{{ConfigAutoResolvePaths}}"/>
         <Enabled Value="{{ConfigEnabled}}"/>

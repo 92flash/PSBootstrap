@@ -37,7 +37,6 @@ These settings will ensure the `Write-Log` cmdlet will work as expected and conf
 
 - Invoke-Bootstrap: Actual orchestrator of the checks and returns the Json domain config
 - New-BootstrapStructure: Creates a new file structure into the directory the cmdlet is run from, with which the project can immediately start
-- Remove-BootstrapStructure: Removes the created file structure
 - Write-Log: Adds a message with date, username, computername, time and type to a log file that is configured in `Bootstrap.xml` under Log.Path
 - Clear-Log: Empties the log file
 - Get-Log: Convert an existing log to a usable PowerShell object

@@ -1,13 +1,9 @@
 using System;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Text;
 using PSBootstrap.Service;
 using PSBootstrap.Shared.Context;
 using PSBootstrap.Shared.Enum;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
-using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Utility;
 using PSBootstrap.Shared.Value_object;
 
@@ -49,7 +45,7 @@ namespace PSBootstrap
         public SwitchParameter NoDetails;
 
         private LogPath _logPath;
-        private ILogService _logService;
+        private LogService _logService;
 
         // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
         protected override void BeginProcessing()

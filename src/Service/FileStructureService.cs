@@ -1,10 +1,9 @@
 using System.IO;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Value_object;
 
 namespace PSBootstrap.Service;
 
-internal class FileStructureService : IFileStructureService
+internal class FileStructureService
 {
     // Creates a file system structure based on the provided base directory and file structure template
     public void Create(string baseDirectory, FileSystemEntry[] fileStructure)

@@ -5,12 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using PSBootstrap.Shared.Entity;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Value_object;
 
 namespace PSBootstrap.Service;
 
-internal class ScriptConfigService(string xmlPath) : IScriptConfigService
+internal class ScriptConfigService(string xmlPath)
 {
     private readonly string _xmlPath = xmlPath;
 

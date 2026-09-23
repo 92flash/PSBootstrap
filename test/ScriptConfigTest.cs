@@ -3,7 +3,6 @@ using System.Xml.Linq;
 using PSBootstrap.Service;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
@@ -12,8 +11,8 @@ namespace Test;
 [TestClass]
 public class ScriptConfigTest
 {
-    private IScriptConfigService? _scriptConfigService;
-    private IFileStructureService? _fileStructureService;
+    private ScriptConfigService? _scriptConfigService;
+    private FileStructureService? _fileStructureService;
     private string _rootPath = string.Empty;
     private string _xmlFilePath = string.Empty;
     private FileSystemEntry[] _fileStructure = FileStructureTemplate.Get("properties", "TestScript", "Bootstrap");

@@ -5,7 +5,6 @@ using PSBootstrap.Service;
 using PSBootstrap.Shared.Context;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
@@ -27,7 +26,7 @@ namespace PSBootstrap
 
 
         private LogPath _logPath;
-        private ILogService logService;
+        private LogService logService;
 
         // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
         protected override void BeginProcessing()

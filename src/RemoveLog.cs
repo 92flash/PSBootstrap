@@ -4,14 +4,13 @@ using System.Management.Automation.Runspaces;
 using PSBootstrap.Service;
 using PSBootstrap.Shared.Context;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Value_object;
 
 namespace PSBootstrap
 {
     [Cmdlet(VerbsCommon.Remove,"Log")]
     [OutputType(typeof(object))]
-    public class DeleteLogCmdletCommand : PSCmdlet
+    public class RemoveLogCmdletCommand : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -25,7 +24,7 @@ namespace PSBootstrap
 
 
         private LogPath _logPath;
-        private ILogService logService;
+        private LogService logService;
 
         // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
         protected override void BeginProcessing()

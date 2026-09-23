@@ -7,12 +7,11 @@ using System.Management.Automation;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Value_object;
 
 namespace PSBootstrap.Service;
 
-public class ConfigService : IConfigService
+public class ConfigService
 {
     public Collection<PSObject>? Config { get; private set; }
 
@@ -23,12 +22,34 @@ public class ConfigService : IConfigService
         return Convert(jsonContent, schemaPath, relativePathReplacement);
     }
 
+    // To prevent accidentally treating non-path properties as paths, we check if the property name ends with "Path" or "Paths"
+    private static bool IsPathProperty(string name) =>
+        name.EndsWith("Path", StringComparison.OrdinalIgnoreCase) ||
+        name.EndsWith("Paths", StringComparison.OrdinalIgnoreCase);
+
     // Recursively walks a PowerShell object's properties, replacing relative-path-looking string values (e.g. ".\..." or "./...") with full paths
     private static void ReplaceRelativePaths(PSObject psObject, string relativePathReplacement)
     {
         foreach (PSPropertyInfo property in psObject.Properties)
         {
-            property.Value = ReplaceRelativePathValue(property.Value, relativePathReplacement);
+            if (IsPathProperty(property.Name))
+            {
+                property.Value = ReplaceRelativePathValue(property.Value, relativePathReplacement);
+            }
+            else if (property.Value is PSObject nestedObject)
+            {
+                ReplaceRelativePaths(nestedObject, relativePathReplacement);
+            }
+            else if (property.Value is object[] array)
+            {
+                foreach (object item in array)
+                {
+                    if (item is PSObject arrayObject)
+                    {
+                        ReplaceRelativePaths(arrayObject, relativePathReplacement);
+                    }
+                }
+            }
         }
     }
 
@@ -50,13 +71,6 @@ public class ConfigService : IConfigService
             default:
                 return value;
         }
-    }
-
-    // Searches for a specific property in the configuration object and returns its value
-    public object? SearchProperty(string propertyName)
-    {
-        // Implement the property search logic here based on the propertyName and scriptConfig
-        throw new NotImplementedException();
     }
 
     public Collection<PSObject>? Convert(string inputObject, JsonSchemaPath? schemaPath = null, string? relativePathReplacement = null)

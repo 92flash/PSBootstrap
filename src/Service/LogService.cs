@@ -7,13 +7,12 @@ using System.Text.RegularExpressions;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Enum;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
 namespace PSBootstrap.Service;
 
-public class LogService(LogPath logPath) : ILogService
+public class LogService(LogPath logPath)
 {
     private readonly LogPath _logPath = logPath;
     private LogStreamState _isOpen = LogStreamState.NotOpened;
@@ -124,10 +123,10 @@ public class LogService(LogPath logPath) : ILogService
         }
     }
 
-    bool ILogService.IsFileEmpty() => new FileInfo(_logPath.ToString()).Length == 0;
+    public bool IsFileEmpty() => new FileInfo(_logPath.ToString()).Length == 0;
 
     // Searches the log file for the specified matches within the last tailBytes of the file.
-    bool ILogService.FindMatch(string[] matches, int tailBytes)
+    public bool FindMatch(string[] matches, int tailBytes)
     {
         lock (_lock)
         {
@@ -174,7 +173,7 @@ public class LogService(LogPath logPath) : ILogService
         if (HeaderConfirmed.GetOrAdd(key, false)) return;
 
         string[] header = LogTemplate.LogHeader();
-        if (!((ILogService)this).FindMatch(header))
+        if (!FindMatch(header, 1024))
         {
             string logEntry = string.Join(Environment.NewLine, header) + Environment.NewLine;
             var bytes = System.Text.Encoding.UTF8.GetBytes(logEntry);

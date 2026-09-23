@@ -10,7 +10,6 @@ using PSBootstrap.Shared.Context;
 using PSBootstrap.Shared.Entity;
 using PSBootstrap.Shared.Enum;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 using PSBootstrap.Shared.Template;
 using PSBootstrap.Shared.Value_object;
 
@@ -21,8 +20,8 @@ namespace PSBootstrap
     public class InvokeBootstrapCmdletCommand : PSCmdlet
     {
         private ScriptConfig _scriptConfig;
-        private IBootstrapService _bootstrapService;
-        private IConfigService _configService;
+        private BootstrapService _bootstrapService;
+        private ConfigService _configService;
         private Collection<PSObject> _config;
 
         // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
@@ -32,17 +31,24 @@ namespace PSBootstrap
             {
                 string moduleBase = MyInvocation.MyCommand.Module.ModuleBase;
                 string xmlPath = new XmlPath(Path.Combine(moduleBase, "Bootstrap.xml")).ToString();
+                string localXmlPath = new XmlPath(Path.Combine(moduleBase, "Bootstrap_local.xml")).ToString();
 
                 // Make sure the script config exists
-                if (!File.Exists(xmlPath))
+                if (!File.Exists(xmlPath) && !File.Exists(localXmlPath))
                 {
                     string file = Path.GetFileName(xmlPath);
                     string directory = Path.GetDirectoryName(xmlPath);
                     throw new BootstrapException($"The Bootstrap XML '{file}' doesn't exist at location '{directory}'. You can create a new Bootstrap.xml file by running the 'New-BootstrapStructure' cmdlet.");
                 }  
 
+                // If a local Bootstrap XML exists, use it instead of the default one
+                if (File.Exists(localXmlPath))
+                {
+                    xmlPath = localXmlPath;
+                }
+
                 // Load the script configuration from the XML file
-                IScriptConfigService scriptConfigService = new ScriptConfigService(xmlPath);
+                ScriptConfigService scriptConfigService = new(xmlPath);
                 _scriptConfig = scriptConfigService.Convert() ??
                     throw new BootstrapException("Script configuration is not initialized.");
 
@@ -89,8 +95,8 @@ namespace PSBootstrap
                     string[] moduleNames = [.. _scriptConfig.Modules.Select(m => m.Name)];
                     if (moduleNames.Length > 0)
                     {
-                        _bootstrapService.CheckModules(moduleNames);
                         _bootstrapService.LoadModules(_scriptConfig.ModulePath.ToString(), moduleNames);
+                        _bootstrapService.CheckModules(moduleNames);
                     }
                 }
 
@@ -137,7 +143,7 @@ namespace PSBootstrap
                 // If logging is enabled and the LogPath is specified, log the error message to the log file
                 if (_scriptConfig.LogEnabled && _scriptConfig.LogPath != null)
                 {
-                    using ILogService logService = new LogService(_scriptConfig.LogPath);
+                    LogService logService = new(_scriptConfig.LogPath);
                     logService.Append($"An error occurred during the bootstrap process: {ex.Message}", LogType.Fatal, true);
                 }
 

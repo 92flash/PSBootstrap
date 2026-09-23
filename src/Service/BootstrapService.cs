@@ -5,20 +5,14 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Language;
 using PSBootstrap.Shared.Exception;
-using PSBootstrap.Shared.Interface;
 
 namespace PSBootstrap.Service;
 
-internal class BootstrapService : IBootstrapService
+internal class BootstrapService(PSCmdlet context)
 {
-    private readonly PSCmdlet moduleContext;
+    private readonly PSCmdlet moduleContext = context;
     private static string _currentDebugPreference;
     private static string _currentVerbosePreference;
-
-    public BootstrapService(PSCmdlet context)
-    {
-        moduleContext = context;
-    }
 
     // Checks if the specified functions are available in the current PowerShell session.
     public void CheckFunctions(string[] functionNames)
