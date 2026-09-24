@@ -41,6 +41,7 @@ These settings will ensure the `Write-Log` cmdlet will work as expected and conf
 - Clear-Log: Empties the log file
 - Get-Log: Convert an existing log to a usable PowerShell object
 - Remove-Log: Deletes the entire log file
+- ConvertFrom-JsonWithSchema: Tries to mimmic the PowerShell 5.1 version of ConvertFrom-Json (uses ConvertFrom-Json under the hood) and add the ability to test a JSON schema with it so that it doesn't only return the converted JSON object, but also test if it complies with the matching schema file. In PowerShell 6+ this can be done with the ConvertFrom-Json and Test-Json Cmdlets, but this isn't possible in PowerShell 5.1. Because converting JSON to object and schema validation is already part of the core functionality of PSBootstrap, a Cmdlet front-end has been created to make use of this functionality in an easier way.
 
 ## Xml Config
 
@@ -138,12 +139,6 @@ PSBootstrap
 │ │ │ └─ LogType.cs                 Types like Information and Error that can individually be set by the user
 │ │ ├─ Exception
 │ │ │ └─ BootstrapException.cs      Custom Bootstrap exception that can be individually caught by a try-catch block
-│ │ ├─ Interface
-│ │ │ ├─ IBootstrapService.cs       Contract for the Bootstrap service
-│ │ │ ├─ IConfigService.cs          Contract for the Config service
-│ │ │ ├─ IFileStructureService.cs   Contract for the FileStructure service
-│ │ │ ├─ ILogService.cs             Contract for the Log service
-│ │ │ └─ IScriptConfigService.cs    Contract for the ScriptConfig service
 │ │ ├─ Template
 │ │ │ ├─ FileStructureTemplate.cs   Template for how the structure of New-BootstrapStructure should look like
 │ │ │ └─ LogTemplate.cs             Template for how the log should look like
@@ -164,10 +159,10 @@ PSBootstrap
 │ │ │ ├─ TemplateFolder.cs          File system abstraction for how a folder looks like
 │ │ │ └─ XmlPath.cs                 Value Object for checking the XML path
 │ ├─ ClearLog.cs                    Cmdlet implementation for clearing a log file
+│ ├─ ConvertFromJsonWithSchema.cs   Mimics ConvertFrom-Json with the added benifit of validating the matching schema
 │ ├─ GetLog.cs                      Cmdlet implementation for getting a log file
 │ ├─ InvokeBootstrap.cs             Cmdlet for fail-fast base to setup script dependencies and logging
 │ ├─ NewBootstrapStructure.cs       Cmdlet for creating a new project structure
-│ ├─ RemoveBootstrapStructure.cs    Cmdlet for removing the project structure
 │ ├─ RemoveLog.cs                   Cmdlet implementation for removing a log file
 │ └─ WriteLog.cs                    Cmdlet implementation for writing an entry to a log file
 ├─ test
